@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navbar</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <!-- Custom CSS -->
+  <style>
+    .navbar-light .navbar-nav .nav-link {
+      color: black;
+    }
+    .navbar-light .navbar-nav .nav-item.active .nav-link {
+      color: black;
+      font-weight: bold;
+      position: relative;
+    }
+    .navbar-light .navbar-nav .nav-item.active .nav-link::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -2px;
+      width: 100%;
+      height: 2px;
+      background-color: black;
+    }
+    .navbar-nav {
+      margin-right: 120px; /* Sağ kenardan uzaklık */
+    }
+    .nav-item {
+      margin-right: 20px; /* Bağlantılar arasındaki mesafe */
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <!-- Logo with AI icon -->
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
+        <!-- Data Operation -->
+        <li class="nav-item">
+          <a class="nav-link" href="http://127.0.0.1:8000/api/data/dataPage/">Data Operation</a>
+        </li>
+        <!-- Predict -->
+        <li class="nav-item">
+          <a class="nav-link" href="http://127.0.0.1:8000/api/data/predictPage/">Predict</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <!-- Custom JavaScript -->
+  <script>
+    $(document).ready(function () {
+      $(".nav-link").click(function () {
+        // Tüm nav-linklerin aktiflik durumunu sıfırla
+        $(".nav-link").removeClass("active");
+        // Tıklanan nav-linki aktif yap
+        $(this).addClass("active");
+      });
+    });
+  </script>
+</body>
+
+</html>
