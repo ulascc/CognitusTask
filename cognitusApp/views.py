@@ -4,7 +4,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import DataSerializer
 from .models import Data
-from rest_framework.permissions import AllowAny
+import requests
+from django.http import JsonResponse
 
 class DataView(APIView):
 
@@ -87,3 +88,18 @@ class DataView(APIView):
         return Response({"message": "Veri başarıyla silindi."}, status=status.HTTP_204_NO_CONTENT)
 
 
+class TrainView(APIView):
+    def get(self, request):
+        # FastAPI'ye GET isteği gönderme
+        fastapi_url = 'http://0.0.0.0:8001/fastapi-endpoint'  # FastAPI URL'si
+        response = requests.get(fastapi_url)
+        
+        # FastAPI'den gelen yanıtı işleme
+        response_data = response.json()
+        
+        return JsonResponse(response_data)  # Yanıtı Django API'si ile döndürme
+
+
+class PredictView(APIView):
+    def post(self, request):
+        pass
