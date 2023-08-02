@@ -35,7 +35,7 @@
                     <th>ID</th>
                     <th>Text</th>
                     <th>Label</th>
-                    <th>Action</th> <!-- Yeni sütun eklendi -->
+                    <th>Action</th> 
                 </tr>
             </thead>
             <tbody id="data-list">
@@ -112,8 +112,8 @@
                     headers: {"X-CSRFToken" : "{{csrf_token}}"},
                     success: function (response) {
                         getDataList();
-                        $("#text-input").val(""); // Formu temizle
-                        $("#label-input").val(""); // Formu temizle
+                        $("#text-input").val(""); 
+                        $("#label-input").val(""); 
                     },
                     error: function (error) {
                         console.log("Yeni veri eklenirken hata oluştu.");
@@ -177,18 +177,16 @@
             });
         }
 
-            // Delete butonlarının tıklama işlemi
             $(document).on("click", ".delete-btn", function () {
                     var id = $(this).data("id");
-                    $("#confirmDelete").data("id", id); // Seçilen ID'yi modal içinde sakla
-                    $("#deleteConfirmationModal").modal("show"); // Modalı aç
+                    $("#confirmDelete").data("id", id); 
+                    $("#deleteConfirmationModal").modal("show");
                 });
 
-                // Onaylama düğmesine tıklama işlemi
                 $("#confirmDelete").click(function () {
                     var id = $(this).data("id");
                     deleteData(id);
-                    $("#deleteConfirmationModal").modal("hide"); // Modalı kapat
+                    $("#deleteConfirmationModal").modal("hide"); 
                 });
 
 

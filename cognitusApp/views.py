@@ -88,18 +88,30 @@ class DataView(APIView):
         return Response({"message": "Veri başarıyla silindi."}, status=status.HTTP_204_NO_CONTENT)
 
 
-class TrainView(APIView):
+class TraineView(APIView):
     def get(self, request):
-        # FastAPI'ye GET isteği gönderme
-        fastapi_url = 'http://0.0.0.0:8001/fastapi-endpoint'  # FastAPI URL'si
+
+        fastapi_url = 'http://0.0.0.0:8001/fastapi-endpoint'
         response = requests.get(fastapi_url)
         
-        # FastAPI'den gelen yanıtı işleme
         response_data = response.json()
         
-        return JsonResponse(response_data)  # Yanıtı Django API'si ile döndürme
+        return JsonResponse(response_data) 
 
 
 class PredictView(APIView):
     def post(self, request):
-        pass
+        text_data = request.data.get('text')
+        if text_data is None:
+            return Response({"error": "Text data not provided"}, status=400)
+
+        
+        fastapi_url = "http://0.0.0.0:8001/predict"
+        response = requests.get(fastapi_url, params={"text": text_data})
+
+        if response.status_code == 200:
+            prediction = response.json().get("prediction")
+            return Response({"prediction": prediction}, status=200)
+        else:
+            return Response({"error": "Error from FastAPI"}, status=500)
+            
