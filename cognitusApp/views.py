@@ -1,4 +1,5 @@
 from datetime import timezone
+import datetime
 import time
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
@@ -92,54 +93,43 @@ class DataView(APIView):
 
 
 
-
 class TraineView(APIView):
     def get(self, request):
-        fastapi_url = 'http://0.0.0.0:8001/traine/'
-        try:
-            response = requests.get(fastapi_url)
-            response_data = response.json()
-            task_id = response_data.get('task_id')
+        
+        start_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-1]
 
-            # Bekleme süresi
-            wait_time = 0.01
+        # FastAPI'ye GET isteği gönderme
+        fastapi_url = 'http://0.0.0.0:8001/traine/'  # FastAPI URL'si
 
-            # Bekleme süresi boyunca uyumak
-            time.sleep(wait_time)
+        response = requests.get(fastapi_url)
+        response_data = response.json()
 
-            # FastAPI'den sonuç al
-            fastapi_result_url = f'http://0.0.0.0:8001/traine_result/{task_id}/'
-            try:
-                response = requests.get(fastapi_result_url)
-                result_data = response.json()
-                message = result_data.get('message')
-                if message == "Model trained and saved.":
-                    status = 'completed'
-                    end_time = timezone.now()
-                elif message == "Task is still pending. Check back later.":
-                    status = 'running'
-                    end_time = None
-                else:
-                    status = 'error'
-                    end_time = None
-            except Exception as e:
-                status = 'error'
-                end_time = None
+        # Bekleme süresi
+        wait_time = 0.2
+        # Bekleme süresi boyunca uyumak
+        time.sleep(wait_time)
+
+        if "task_id" in response_data:
+            task_id = response_data["task_id"]
+
+            # FastAPI'ye GET isteği göndererek sonucu al
+            result_url = f'http://0.0.0.0:8001/traine_result/{task_id}'
+            result_response = requests.get(result_url)
+            result_data = result_response.json()
 
             # Yeni bir TrainingLog kaydı oluştur ve veritabanına kaydet
-            log = TrainingLog.objects.create(status=status, end_time=end_time)
+            log = TrainingLog.objects.create(start_time=start_time, end_time=result_data.get("end_time"), status=result_data.get("status"))
 
-            # TrainingLog nesnesini serialize et
             serialized_data = {
                 'task_id': task_id,
-                'start_time': log.start_time,
-                'end_time': log.end_time,
-                'status': log.status,
+                'start_time': start_time,
+                'end_time': result_data.get("end_time"),
+                'status': result_data.get("status"),
             }
             
             return Response(serialized_data)
-        except Exception as e:
-            return Response({'error': str(e)}, status=500)
+        else:
+            return JsonResponse(response_data)  # FastAPI'den gelen yanıtı direkt döndürme
 
 
 
