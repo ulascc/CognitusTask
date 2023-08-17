@@ -27,6 +27,12 @@
         $(document).ready(function () {
             $("#predict-button").click(function () {
                 var textData = $("#text").val();
+                
+                if (textData.trim() === "") {
+                    $("#prediction-result").html('<div class="alert alert-danger" role="alert">please enter a data.</div>');
+                    return;
+                }
+
                 $.ajax({
                     type: "POST",
                     url: "{% url 'datapredict'%}",
