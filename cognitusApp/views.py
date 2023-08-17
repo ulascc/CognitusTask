@@ -9,7 +9,7 @@ from .serializers import DataSerializer, TrainingLogSerializer
 from .models import Data, TrainingLog
 import requests
 from django.http import JsonResponse
-from django.utils import timezone
+
 
 class DataView(APIView):
 
@@ -148,4 +148,23 @@ class PredictView(APIView):
             return Response({"prediction": prediction}, status=200)
         else:
             return Response({"error": "Error from FastAPI"}, status=500)
+        
+
+class LogView(APIView):
+
+    def get(self,reguest):
+        try:
+            logs = TrainingLog.objects.all()
+            serializer = TrainingLogSerializer(logs, many=True)
+
+            return Response({
+                'data': serializer.data,
+                'message': 'Data fetched successfully.'
+            }, status=status.HTTP_200_OK)
+    
+        except Exception as e:
+            return Response({
+                'data': {},
+                'message': 'Something went wrong while fetching data.'
+            }, status=status.HTTP_400_BAD_REQUEST)
             

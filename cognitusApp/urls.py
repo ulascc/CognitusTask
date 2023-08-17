@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import DataView, TraineView, PredictView
+from .views import DataView, TraineView, PredictView, LogView
 from django.views.generic import TemplateView
 
 urlpatterns = [
@@ -10,5 +10,7 @@ urlpatterns = [
     path('datapredict/', PredictView.as_view(), name='datapredict'),
 
     path('trainePage/', TemplateView.as_view(template_name='traine.html'), name='trainePage'),
-    path('datatraine/', TraineView.as_view(), name='datatraine')
+    path('datatraine/', TraineView.as_view(), name='datatraine'),
+
+     path('trainelogs/', LogView.as_view(), name='trainelogs'),
 ]
