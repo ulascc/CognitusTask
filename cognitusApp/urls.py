@@ -12,5 +12,5 @@ urlpatterns = [
     path('trainePage/', TemplateView.as_view(template_name='traine.html'), name='trainePage'),
     path('datatraine/', TraineView.as_view(), name='datatraine'),
 
-     path('trainelogs/', LogView.as_view(), name='trainelogs'),
+    path('trainelogs/', LogView.as_view(), name='trainelogs'),
 ]

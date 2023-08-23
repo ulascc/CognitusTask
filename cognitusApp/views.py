@@ -1,4 +1,3 @@
-from datetime import timezone
 import datetime
 import time
 from django.shortcuts import get_object_or_404
@@ -9,6 +8,8 @@ from .serializers import DataSerializer, TrainingLogSerializer
 from .models import Data, TrainingLog
 import requests
 from django.http import JsonResponse
+from urllib.parse import urljoin
+from decouple import config
 
 
 class DataView(APIView):
@@ -95,29 +96,24 @@ class DataView(APIView):
 
 class TraineView(APIView):
     def get(self, request):
-        
         start_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-1]
 
-        # FastAPI'ye GET isteği gönderme
-        fastapi_url = 'http://0.0.0.0:8001/traine/'  # FastAPI URL'si
+        fastapi_url = config('FASTAPI_URL')
+        full_fastapi_url = urljoin(fastapi_url, 'traine')
 
-        response = requests.get(fastapi_url)
+        response = requests.get(full_fastapi_url)
         response_data = response.json()
 
-        # Bekleme süresi
         wait_time = 0.2
-        # Bekleme süresi boyunca uyumak
         time.sleep(wait_time)
 
         if "task_id" in response_data:
             task_id = response_data["task_id"]
 
-            # FastAPI'ye GET isteği göndererek sonucu al
-            result_url = f'http://0.0.0.0:8001/traine_result/{task_id}'
+            result_url = f'{fastapi_url}traine_result/{task_id}'
             result_response = requests.get(result_url)
             result_data = result_response.json()
 
-            # Yeni bir TrainingLog kaydı oluştur ve veritabanına kaydet
             log = TrainingLog.objects.create(start_time=start_time, end_time=result_data.get("end_time"), status=result_data.get("status"))
 
             serialized_data = {
@@ -126,29 +122,33 @@ class TraineView(APIView):
                 'end_time': result_data.get("end_time"),
                 'status': result_data.get("status"),
             }
-            
+
             return Response(serialized_data)
         else:
-            return JsonResponse(response_data)  # FastAPI'den gelen yanıtı direkt döndürme
+            return JsonResponse(response_data)
 
 
+FASTAPI_URL = config('FASTAPI_URL')
 
 class PredictView(APIView):
     def post(self, request):
+
         text_data = request.data.get('text')
         if text_data is None:
             return Response({"error": "Text data not provided"}, status=400)
 
-        
-        fastapi_url = "http://0.0.0.0:8001/predict"
-        response = requests.get(fastapi_url, params={"text": text_data})
+        fastapi_url = config('FASTAPI_URL')
+        full_fastapi_url = urljoin(fastapi_url, 'predict')
+
+        response = requests.get(full_fastapi_url, params={"text": text_data})
 
         if response.status_code == 200:
             prediction = response.json().get("prediction")
             return Response({"prediction": prediction}, status=200)
         else:
             return Response({"error": "Error from FastAPI"}, status=500)
-        
+
+
 
 class LogView(APIView):
 
