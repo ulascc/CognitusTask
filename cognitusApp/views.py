@@ -10,10 +10,11 @@ import requests
 from django.http import JsonResponse
 from urllib.parse import urljoin
 from decouple import config
-
+import grpc
+from proto import predict_pb2
+from proto import predict_pb2_grpc
 
 class DataView(APIView):
-
     def get(self,reguest):
         try:
             datas = Data.objects.all()
@@ -30,8 +31,8 @@ class DataView(APIView):
                 'message': 'Something went wrong while fetching data.'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-    def post(self,request):
-        #import ipdb;ipdb.set_trace()    
+
+    def post(self,request):    
         try:
             data = request.data
             serializer = DataSerializer(data=data)
@@ -94,8 +95,12 @@ class DataView(APIView):
 
 
 
+
+FASTAPI_URL = config('FASTAPI_URL')
+
 class TraineView(APIView):
     def get(self, request):
+
         start_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-1]
 
         fastapi_url = config('FASTAPI_URL')
@@ -128,7 +133,10 @@ class TraineView(APIView):
             return JsonResponse(response_data)
 
 
-FASTAPI_URL = config('FASTAPI_URL')
+
+FASTAPI_GRPC_HOST = 'localhost'
+FASTAPI_GRPC_PORT = 50051 
+
 
 class PredictView(APIView):
     def post(self, request):
@@ -137,21 +145,18 @@ class PredictView(APIView):
         if text_data is None:
             return Response({"error": "Text data not provided"}, status=400)
 
-        fastapi_url = config('FASTAPI_URL')
-        full_fastapi_url = urljoin(fastapi_url, 'predict')
+        channel = grpc.insecure_channel(f'{FASTAPI_GRPC_HOST}:{FASTAPI_GRPC_PORT}')
+        stub = predict_pb2_grpc.PredictionStub(channel)
 
-        response = requests.get(full_fastapi_url, params={"text": text_data})
+        prediction_request = predict_pb2.PredictionRequest(text=text_data)
+        response = stub.GetPrediction(prediction_request)
 
-        if response.status_code == 200:
-            prediction = response.json().get("prediction")
-            return Response({"prediction": prediction}, status=200)
-        else:
-            return Response({"error": "Error from FastAPI"}, status=500)
+        prediction = response.prediction
+        return Response({"prediction": prediction}, status=200)
 
 
 
 class LogView(APIView):
-
     def get(self,reguest):
         try:
             logs = TrainingLog.objects.all()
