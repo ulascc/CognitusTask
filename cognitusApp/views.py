@@ -109,20 +109,18 @@ class TraineView(APIView):
         response = requests.get(full_fastapi_url)
         response_data = response.json()
 
-        wait_time = 0.2
-        time.sleep(wait_time)
 
-        if "task_id" in response_data:
-            task_id = response_data["task_id"]
+        if "job_id" in response_data:
+            job_id = response_data["job_id"]
 
-            result_url = f'{fastapi_url}traine_result/{task_id}'
+            result_url = f'{fastapi_url}traine_result/{job_id}'
             result_response = requests.get(result_url)
             result_data = result_response.json()
 
             log = TrainingLog.objects.create(start_time=start_time, end_time=result_data.get("end_time"), status=result_data.get("status"))
 
             serialized_data = {
-                'task_id': task_id,
+                'task_id': job_id,
                 'start_time': start_time,
                 'end_time': result_data.get("end_time"),
                 'status': result_data.get("status"),
